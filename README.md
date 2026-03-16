@@ -1,50 +1,81 @@
-# fMRI + ML/AI Implementation Paper
+# BrainAge-Dx
 
-Implementation paper exploring novel machine learning approaches for fMRI-based neuropsychiatric disorder diagnosis.
+**Regional Functional Connectivity Age-Gap Profiles as Transdiagnostic Fingerprints for Neuropsychiatric Diagnosis**
 
-## Three Novel Ideas Under Consideration
+## One-Line Summary
 
-| # | Idea | Key Innovation | Datasets | Timeline | GPU? |
-|---|------|---------------|----------|----------|------|
-| 1 | **BrainDevScore** | Normative FC deviation maps + conformal prediction | HCP + ABIDE + REST-MDD + COBRE | 3-4 weeks | No |
-| 2 | **FC-ContrastNet** | Self-supervised contrastive learning on brain graphs | HCP + SRPBS + ADHD-200 | 4-5 weeks | Yes (T4) |
-| 3 | **BrainAge-Dx** | Regional brain functional age gap profiles | HCP + ABIDE + UCLA CNP | 2-3 weeks | No |
+> Train a brain age predictor on healthy subjects, then show that the **pattern** of which brain networks age faster/slower uniquely identifies ASD, schizophrenia, bipolar disorder, and ADHD — using nothing but ridge regression.
 
-See [`research/ideas/THREE_NOVEL_IDEAS.md`](research/ideas/THREE_NOVEL_IDEAS.md) for full details.
+## Why This Matters
+
+- **Brain age gap** is established — but gives ONE number (crude)
+- **Different disorders affect different networks** — the regional *pattern* is the real biomarker
+- **2025 evidence** shows simpler models are MORE sensitive to clinical deviations than deep learning
+- **Result:** A 7-dimensional "brain aging fingerprint" per patient — visualized as an intuitive radar chart
+
+## The Killer Figure
+
+```
+        DMN
+       / | \
+     FP  |  VIS
+    /    |    \
+   DA ---+--- SM
+    \    |    /
+     VA  |  LIM
+       \ | /
+      [center]
+
+  ASD: DMN delayed, others normal
+  SZ:  Salience + Executive accelerated
+  BD:  Limbic + DMN accelerated
+  ADHD: Frontoparietal delayed
+```
+
+Each disorder has a distinct radar chart shape = diagnostic fingerprint.
+
+## Datasets (~2,590 subjects)
+
+| Dataset | N | Disorder | Role |
+|---------|---|----------|------|
+| **HCP-YA** | 1,206 | Healthy | Train brain age model |
+| **ABIDE I** | 1,112 | ASD (539) + HC (573) | Test — developmental |
+| **UCLA CNP** | 272 | SZ (58) + BD (49) + ADHD (45) + HC (138) | Test — multi-disorder |
+
+## Method
+
+```
+fMRI → FC Matrix → Yeo 7-Network Features (28 dim) → Ridge Regression → Brain Age Gap → Regional Profile → Diagnosis
+```
+
+1. Extract network-level FC features (7 within-network + 21 between-network = 28)
+2. Train ridge regression on HCP healthy subjects (age prediction)
+3. Compute global + 7 regional brain age gaps for patients
+4. Use regional gap profiles for cross-disorder classification
+5. Correlate with symptom severity
+
+**No GPU needed. Runs on a laptop in minutes.**
 
 ## Repository Structure
 
 ```
 .
 ├── README.md
+├── IMPLEMENTATION_PLAN.md         # Detailed step-by-step plan
 ├── research/
-│   ├── ideas/                    # Novel idea proposals and analysis
-│   │   └── THREE_NOVEL_IDEAS.md  # Detailed comparison of 3 ideas
-│   ├── datasets/                 # Dataset documentation and access guides
-│   │   └── DATASET_GUIDE.md      # All datasets with access instructions
-│   └── literature/               # Key papers and references
-│       └── KEY_PAPERS.md         # 26 key papers organized by topic
+│   ├── ideas/                     # All 3 ideas considered
+│   ├── datasets/                  # Dataset access guides
+│   └── literature/                # Key references
 ├── code/
-│   ├── preprocessing/            # FC matrix extraction, atlas handling
-│   ├── models/                   # Model architectures
-│   ├── evaluation/               # Metrics, cross-validation, conformal prediction
-│   └── utils/                    # Data loading, visualization helpers
+│   ├── preprocessing/             # FC extraction, feature computation
+│   ├── models/                    # Ridge regression, classification
+│   ├── evaluation/                # CV, statistics, metrics
+│   └── utils/                     # Data loading, visualization
 ├── paper/
-│   ├── figures/                  # Publication-quality figures
-│   └── tables/                   # Results tables
-└── results/                      # Experiment outputs, logs, saved models
+│   ├── figures/                   # Radar charts, brain maps, confusion matrices
+│   └── tables/                    # Results tables
+└── results/                       # Experiment outputs
 ```
-
-## Datasets Used
-
-All publicly available:
-- **HCP-YA** (1,206 healthy) — normative baseline
-- **ABIDE I+II** (2,156 ASD) — autism classification
-- **REST-meta-MDD** (2,428 MDD) — depression classification
-- **SRPBS** (2,414, 7 disorders) — multi-disorder classification
-- **ADHD-200** (973 ADHD) — ADHD classification
-- **UCLA CNP** (272, SZ/BD/ADHD) — multi-disorder validation
-- **COBRE** (146 SZ) — schizophrenia validation
 
 ## Requirements
 
@@ -52,20 +83,36 @@ All publicly available:
 python >= 3.9
 nilearn >= 0.10
 scikit-learn >= 1.3
-pytorch >= 2.0 (for Idea 2 only)
-torch-geometric >= 2.4 (for Idea 2 only)
+numpy >= 1.24
+pandas >= 2.0
 matplotlib >= 3.7
 seaborn >= 0.12
-mapie >= 0.8 (conformal prediction)
+scipy >= 1.11
+statsmodels >= 0.14
 ```
+
+## Timeline
+
+- **Week 1:** Data download + FC feature extraction
+- **Week 2:** Train models + run experiments + statistics
+- **Week 3:** Figures + paper writing
 
 ## Status
 
 - [x] Literature review completed
 - [x] Research gap analysis
-- [x] 3 novel ideas proposed
+- [x] 3 novel ideas proposed and evaluated
+- [x] **Idea selected: BrainAge-Dx**
+- [x] Detailed implementation plan
 - [x] Dataset identification and access guide
-- [ ] Idea selection (pending)
-- [ ] Implementation
-- [ ] Experiments
-- [ ] Paper writing
+- [ ] Data download and preprocessing
+- [ ] Model training and experiments
+- [ ] Figures and visualizations
+- [ ] Paper draft
+
+## Target Journals
+
+- **NeuroImage** (IF 4.7)
+- **Human Brain Mapping** (IF 3.5)
+- **NeuroImage: Clinical** (IF 3.4)
+- Stretch: **Nature Communications** (IF 14.7) if results are strong
