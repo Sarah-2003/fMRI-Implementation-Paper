@@ -1,0 +1,40 @@
+# Data (too large for git)
+data/
+*.nii
+*.nii.gz
+*.npy
+*.npz
+*.pkl
+*.h5
+*.hdf5
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.eggs/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results (large files)
+results/*.pt
+results/*.pth
+results/*.joblib
+
+# Credentials
+.env
+*.token
